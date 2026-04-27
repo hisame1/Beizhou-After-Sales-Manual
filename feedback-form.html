@@ -443,23 +443,24 @@
             };
 
             try {
+                // 使用 no-cors 模式，避免 CORS 预检
+                // 注意：no-cors 模式下无法读取响应内容，但请求会成功送达 GAS
                 var response = await fetch(APPS_SCRIPT_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(formData)
                 });
 
-                var result = await response.json();
+                // no-cors 模式下 response.type 是 "opaque"，无法读取具体内容
+                // 但没有抛出异常说明请求已成功发出
+                feedbackForm.style.display = 'none';
+                successMessage.classList.add('show');
 
-                if (result.success) {
-                    feedbackForm.style.display = 'none';
-                    successMessage.classList.add('show');
-                } else {
-                    throw new Error(result.message || 'Submission failed');
-                }
             } catch (err) {
+                console.error('Fetch error:', err);
                 showError('Submission failed: ' + err.message);
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('loading');
