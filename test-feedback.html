@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Feedback API</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .log {
+            background: #252525;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: #4caf50; }
+        .error { color: #ff6b6b; }
+        .info { color: #4a9eff; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #4a9eff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Feedback API Test</h1>
+    
+    <button onclick="testGET()">Test GET Request</button>
+    <button onclick="testPOST()">Test POST Request</button>
+    <button onclick="testDirectLink()">Open GAS URL Directly</button>
+    
+    <div id="log"></div>
+
+    <script>
+        var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6TgSArPXF_h6FhBiRX_GWDmUpOoLf8_-waDtbdHnz1H8R5jFzhiPs23Yi0xNJ9hJn/exec';
+        
+        function log(msg, type) {
+            var logDiv = document.getElementById('log');
+            var p = document.createElement('div');
+            p.className = type || 'info';
+            p.textContent = new Date().toLocaleTimeString() + ' - ' + msg;
+            logDiv.appendChild(p);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(msg);
+        }
+
+        async function testGET() {
+            log('Testing GET request...', 'info');
+            try {
+                var response = await fetch(APPS_SCRIPT_URL);
+                log('Response status: ' + response.status, 'info');
+                var text = await response.text();
+                log('Response: ' + text, 'success');
+            } catch (err) {
+                log('GET failed: ' + err.message, 'error');
+            }
+        }
+
+        async function testPOST() {
+            log('Testing POST request...', 'info');
+            var testData = {
+                country: 'Test',
+                carModel: 'Test',
+                description: 'This is a test submission',
+                email: 'test@example.com'
+            };
+            
+            try {
+                var response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                log('Response status: ' + response.status, 'info');
+                var text = await response.text();
+                log('Response: ' + text, 'success');
+            } catch (err) {
+                log('POST failed: ' + err.message, 'error');
+                log('This might be a CORS issue. Try re-deploying the GAS web app.', 'error');
+            }
+        }
+
+        function testDirectLink() {
+            log('Opening GAS URL directly...', 'info');
+            window.open(APPS_SCRIPT_URL, '_blank');
+        }
+    </script>
+</body>
+</html>
